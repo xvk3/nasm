@@ -4,20 +4,49 @@
 ;
 ;     nasm -felf64 hello.asm && ld hello.o && ./a.out
 ; ----------------------------------------------------------------------------------------
-
 BITS 64
-
           global    _start
-
           section   .text
-_start:   mov       rax, 1                  ; system call for write
-          mov       rdi, 1                  ; file handle 1 is stdout
-          mov       rsi, message            ; address of string to output
-          mov       rdx, 13                 ; number of bytes
-          syscall                           ; invoke operating system to do the write
-          mov       rax, 60                 ; system call for exit
-          xor       rdi, rdi                ; exit code 0
-          syscall                           ; invoke operating system to exit
 
+_start:
+          mov rcx, message
+          call _strlen
+          mov rdx, rax
+          call _printf
+
+          mov rcx, 0
+          call _exit
+  
           section   .data
-message:  db        "Hello, World", 10      ; note the newline at the end
+message:  db        "Hello, World! This is a longer string", 10      ; note the newline at the end
+
+
+_printf:
+; expect a string in rcx and length in rdx
+  mov rax, 01h
+  mov rdi, 01h
+  mov rsi, rcx
+  syscall
+  ret
+
+_strlen:
+; expects a NULL terminated string in rcx
+; returns length in rax
+  push rcx
+  xor rax, rax
+  _strlen_loop:
+    cmp byte [rcx], 00h
+    je _strlen_null
+    inc rcx
+    inc rax
+    jmp _strlen_loop
+  _strlen_null:
+  pop rcx
+  ret
+
+_exit:
+; expects return code in rcx
+  mov rax, 60
+  mov rdi, rcx
+  syscall
+  ret
