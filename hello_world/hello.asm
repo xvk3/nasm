@@ -1,30 +1,45 @@
-; ----------------------------------------------------------------------------------------
-; Writes "Hello, World" to the console using only system calls. Runs on 64-bit Linux only.
-; To assemble and run:
-;
-;     nasm -felf64 hello.asm && ld hello.o && ./a.out
-; ----------------------------------------------------------------------------------------
 BITS 64
-          global    _start
-          section   .text
+  global _start
+
+  section .data
+    message: db "Hello World!", 10
+
+  section .bss
+    buffer: resb 64
+
+  section .text
 
 _start:
-          mov rcx, message
-          call _strlen
-          mov rdx, rax
-          call _printf
 
-          mov rcx, 0
-          call _exit
+  mov rcx, message
+  call _strlen
+  mov rdx, rax
+  call _printf
+
+  mov rcx, buffer
+  mov rdx, 64
+  call _read
+
+  mov rcx, buffer
+  call _strlen
+  mov rdx, rax
+  call _printf
+
+  mov rcx, 0
+  call _exit
   
-          section   .data
-message:  db        "Hello, World! This is a longer string", 10      ; note the newline at the end
-
-
 _printf:
 ; expect a string in rcx and length in rdx
-  mov rax, 01h
-  mov rdi, 01h
+  mov rax, 01h          ; sys_write
+  mov rdi, 01h          ; stdout
+  mov rsi, rcx
+  syscall
+  ret
+
+_read:
+; expect a buffer in rcx and length in rdx
+  mov rax, 00h          ; sys_read    
+  mov rdi, 01h          ; stdin
   mov rsi, rcx
   syscall
   ret
