@@ -1,3 +1,5 @@
+%include "std.asm"
+
 BITS 64
   global _start
 
@@ -42,6 +44,8 @@ _start:
 
   ; call the calculated address
   call r15 
+
+  call _test
 
   .exit:
     mov rcx, rax
