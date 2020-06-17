@@ -45,40 +45,6 @@ _start:
   ; call the calculated address
   call r15 
 
-  call _test
-
   .exit:
     mov rcx, rax
     call _exit
-
-; subroutines
-_printf:
-; expecs a string in rcx and length in rdx
-; TODO if rdx is 0 call _strlen
-  mov rax, 01h        ; sys_write
-  mov rdi, 01h        ; stdout
-  mov rsi, rcx        ; passed string
-  syscall
-  ret
-
-_strlen:
-; expects a NULL terminated string in rcx
-; returns length in rax
-  push rcx
-  xor rax, rax
-  _strlen_loop:
-    cmp byte [rcx], 00h
-    je _strlen_null
-    inc rcx
-    inc rax
-    jmp _strlen_loop
-  _strlen_null:
-  pop rcx
-  ret
-
-_exit:
-; expects return code in rcx
-  mov rax, 60
-  mov rdi, rcx
-  syscall
-  ret                 ; pointless ret?
