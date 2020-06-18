@@ -1,7 +1,17 @@
 Repository for storing simple NASM programs
 
+## Programs:
+
 1. hello_world - basic source for a hello world program I found online
- - [ ] Add function to print the contents of a register 
 
 2. mem - basic memory manipulation
- - [ ] Improve "printf" function
+
+## TODO:
+
+ - [ ] Convert huff_package.asm to assemble under nasm
+ - [ ] Improve "printf" fuction in std.asm
+ - [ ] Write subroutine to print the value of a register
+   - [ ] Dump all registers
+ - [ ] Write subroutine to print x bytes of memory
+ - [ ] Write subroutine to analyse /proc/self/maps and memory protection/flags
+ - [ ] Write subroutine to change memory protection/flags
