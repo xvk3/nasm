@@ -3,6 +3,7 @@ BITS 64
 
   section .data
     usage   db "Incorrect number of command line parameters",10,0
+    newln   db 10,0
 
 _start:
 
@@ -13,7 +14,13 @@ _start:
   xor r9, r9
   .args_loop:
     add r9, 08h
+    ; print parameter
     mov rcx, qword [rsp+r9]
+    call _strlen
+    mov rdx, rax
+    call _printf
+    ; print newline
+    mov rcx, newln
     call _strlen
     mov rdx, rax
     call _printf
@@ -22,7 +29,7 @@ _start:
 
   jmp .exit
 
-  .argc_below_3:
+   .argc_below_3:
     mov rcx, usage
     call _strlen
     mov rdx, rax
