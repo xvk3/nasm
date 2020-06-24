@@ -1,0 +1,3 @@
+all:
+	nasm -i /home/w/SSD0/projects/git/nasm/library/ maps.asm -f elf64 -o maps.obj
+	ld maps.obj -o maps.elf

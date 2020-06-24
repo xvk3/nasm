@@ -6,6 +6,10 @@ Repository for storing simple NASM programs
 
 2. mem - basic memory manipulation
 
+3. hook - function hooking tests
+
+4. maps - parses /proc/self/maps
+
 ## TODO:
 
  - [ ] Convert huff_package.asm to assemble under nasm
