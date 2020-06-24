@@ -10,6 +10,12 @@ Repository for storing simple NASM programs
 
 4. maps - parses /proc/self/maps
 
+## Library:
+
+1. std.asm - general debug and QoL procedures
+
+2. mem.asm - memory manipulation functions
+
 ## TODO:
 
  - [ ] Convert huff_package.asm to assemble under nasm
@@ -18,4 +24,4 @@ Repository for storing simple NASM programs
    - [ ] Dump all registers
  - [ ] Write subroutine to print x bytes of memory
  - [ ] Write subroutine to analyse /proc/self/maps and memory protection/flags
- - [ ] Write subroutine to change memory protection/flags
+ - [ ] Write subroutine to change memory protection/flags (mprotect wrapper)
