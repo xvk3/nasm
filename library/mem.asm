@@ -4,6 +4,39 @@ BITS 64
 ;
 
 
+
+; _mprotect           - acts as a wrapper for mprotect
+;                     - returns 0 on success
+;         rcx - lpAddress - 64bit address
+;         rdx - prot      - protections flags
+;         r8  - len       - length
+_mprotect:
+  
+  ; preserve caller registers
+  push rcx
+  push rdx
+  push r8
+  push r9
+  push r10
+  push r11
+  
+  ; rdx is already prot flags
+  mov rsi, r8         ; len
+  mov rdi, rcx        ; start
+  mov rax, 0Ah        ; mprotect(2)
+  syscall
+
+  ; restore registers
+  pop r11
+  pop r10
+  pop r9
+  pop r8
+  pop rdx
+  pop rcx
+  ret
+_mprotect_end:
+  
+
 ; _lookupMapByAddress - reads /proc/self/maps and populates the supplied s_map
 ;                       structure with the memory map surrounding lpAddress
 ;                     - returns 0 on success
@@ -136,7 +169,7 @@ _lookupMapByAddress:
     cmp r15, r8       ; lpAddress > s_map.start
     jb .seek_to_newline
     cmp r15, r9       ; lpAddress < s_map.end
-    ja .seek_to_newline
+    jae .seek_to_newline
     pop rdx           ; rdx is no lps_map
     mov qword [rdx], r8
     mov qword [rdx+08h], r9
@@ -207,5 +240,5 @@ _lookupMapByAddress:
   pop r8
   pop rcx
   ret
-
   proc_self_maps: db "/proc/self/maps",0
+_lookupMapByAddress_end:

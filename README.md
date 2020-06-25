@@ -23,5 +23,5 @@ Repository for storing simple NASM programs
  - [ ] Write subroutine to print the value of a register
    - [ ] Dump all registers
  - [ ] Write subroutine to print x bytes of memory
- - [ ] Write subroutine to analyse /proc/self/maps and memory protection/flags
- - [ ] Write subroutine to change memory protection/flags (mprotect wrapper)
+ - [x] Write subroutine to analyse /proc/self/maps and memory protection/flags
+ - [x] Write subroutine to change memory protection/flags (mprotect wrapper)
