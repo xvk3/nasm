@@ -41,7 +41,7 @@ _getFileSize:
   mov rdi, rcx
   mov rax, 04h
   syscall
-  mov rax, qword [rdx+30h] 
+  mov rax, qword [rsi+30h] 
   ;30h = stat->st_size offset
   ret
 _getFileSize_end:
