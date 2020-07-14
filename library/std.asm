@@ -1,6 +1,29 @@
 BITS 64
+;
+; nasm/library/std.asm
+;
 
 
+struc s_stat                ; size = 144 /  90h
+    .st_dev         resq 1  ; offset 0   /  00h
+    .st_ino         resq 1  ; offset 8   /  08h
+    .st_nlink       resq 1  ; offset 16  /  10h
+    .st_mode        resd 1  ; offset 24  /  18h
+    .st_uid         resd 1  ; offset 28  /  1Ch
+    .st_gid         resd 1  ; offset 32  /  20h
+    .pad0           resb 4  ; offset 36  /  24h
+    .st_rdev        resq 1  ; offset 40  /  28h
+    .st_size        resq 1  ; offset 48  /  30h
+    .st_blksize     resq 1  ; offset 56  /  38h
+    .st_blocks      resq 1  ; offset 64  /  40h
+    .st_atime       resq 1  ; offset 72  /  48h
+    .st_atime_nsec  resq 1  ; offset 80  /  50h
+    .st_mtime       resq 1  ; offset 88  /  58h
+    .st_mtime_nsec  resq 1  ; offset 96  /  60h
+    .st_ctime       resq 1  ; offset 104 /  68h
+    .st_ctime_nsec  resq 1  ; offset 112 /  70h
+    .__unused       resb 24 ; offset 120 /  78h
+endstruc
 
 struc s_map
   .start       resb 8
@@ -9,6 +32,21 @@ struc s_map
   .flags       resb 8
 endstruc
 
+;_getFileSize         - calls sys_stat and returns st_size
+;                     - returns st_size on success
+;       rcx - filename
+_getFileSize:
+  sub rsp, 90h
+  mov rsi, rsp
+  mov rdi, rcx
+  mov rax, 04h
+  syscall
+  mov rax, qword [rdx+30h] 
+  ;30h = stat->st_size offset
+  ret
+_getFileSize_end:
+
+;_print_self_map      - 
 ;       rcx - buffer
 ;       rdx - buffer_size
 _print_self_map:
@@ -24,7 +62,7 @@ _print_self_map:
   mov r14, rdx
 
   ; open(pathname, flags, mode)
-  mov rdi, proc_self_maps
+  mov rdi, .proc_self_maps
   mov rsi, 00h          ; flags | O_RDONLY
   mov rdx, 00h          ; mode
   mov rax, 02h          ; open(2)
@@ -40,7 +78,6 @@ _print_self_map:
   mov rax, 00h          ; read(2)
   syscall
 
-  ;db 0xcc
   ; read until second " " and trim
   mov rsi, r13
   xor rdx, rdx
@@ -75,16 +112,8 @@ _print_self_map:
     inc rsi
     jmp .seek
 
-
-
   push rax
-  ; write(int fd, void* buf, size_t count)
-  ;mov rdi, 01h          ; fd (File Descrptor) | stdout=1
-  ;mov rsi, r11          ; buffer
-  ;mov rdx, rax          ; bytes read
-  ;mov rax, 01h          ; write(2)
-  ;syscall
-  
+
   ; close(int fd)
   mov rdi, r15
   mov rax, 03h          ; close(2)
@@ -96,9 +125,9 @@ _print_self_map:
   pop r14
   pop r15
   ret
-  proc_self_maps: db "/proc/self/maps",0
-  etc_hosts:      db "/etc/hosts",0
-
+  .proc_self_maps: db "/proc/self/maps",0
+  .etc_hosts:      db "/etc/hosts",0
+_print_self_map_end:
 
 ;       rcx - qwSize
 ;       rdx - qwProtections
@@ -112,6 +141,7 @@ _allocate_memory:
   mov rax, 9
   syscall
   ret
+_allocate_memory_end:
 
 _rcx_to_string:
 ; converts the value of rcx into the hexadecimal representation
@@ -134,6 +164,7 @@ _rcx_to_string:
     test rcx, rcx
   jnz .loop
     ret
+_rcx_to_string_end:
 
 _printf:
 ; expects a string in rcx and length in rdx
@@ -143,6 +174,7 @@ _printf:
   ;db 0xcc
   syscall
   ret
+_printf_end:
 
 _read:
 ; expects a buffer in rcx and length in rdx
@@ -151,6 +183,7 @@ _read:
   mov rsi, rcx          ; buffer
   syscall
   ret
+_read_end:
 
 _strlen:
 ; expects a NULL terminated string in rcx
@@ -166,9 +199,11 @@ _strlen:
   _strlen_null:
     pop rcx
     ret
+_strlen_end:
 
 _exit:
 ; expects the return code in rcx
   mov rax, 60
   mov rdi, rcx
   syscall
+_exit_end:

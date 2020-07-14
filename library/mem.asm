@@ -44,18 +44,12 @@ _mprotect_end:
 ;         rdx - lps_map   - pointer to s_map structure / 32bytes of writable memory
 _lookupMapByAddress:
 
-  struc s_map
-    .start        resb 8
-    .end          resb 8
-    .length       resb 8
-    .permissions  resb 8
-  endstruc
-
   ; preserve caller register
   push rcx            ; lpAddress (passed parameter)
   push r8             ; memory map start address
   push r9             ; memory map end address 
   push r10            ; memory permissions
+  push r12            ; size of buffer
   push r13            ; /proc/self/maps lpAddres
   push r14            ; file descriptor (fd)
   push r15            ; lpAddress holding register
@@ -65,7 +59,7 @@ _lookupMapByAddress:
   mov r15, rcx
 
   ; open(pathname, flags, mode)
-  mov rdi, proc_self_maps 
+  mov rdi, .proc_self_maps 
   mov rsi, 00h        ; flags | 0_RDONLY
   mov rdx, 00h        ; mode
   mov rax, 02h        ; open(2)
@@ -74,9 +68,16 @@ _lookupMapByAddress:
   ; save file descriptor
   mov r14, rax
 
-  ; mmap(TODO fill this in)
+  ; getFileSize(filename) calls sys_stat
+  mov rcx, .proc_self_maps
+  call _getFileSize
+
+  mov r12, rax 
+  db 0xcc
+ 
+  ; mmap(addr, len, prot, flags, fd, off)
   xor rdi, rdi        ; addr   - 0
-  mov rsi, 1000h      ; len
+  mov rsi, rax        ; len
   mov rdx, 06h        ; prot   - PROT_READ(04h) | PROT_WRITE(02h) = 06h
   mov r10, 22h        ; flags  - MAP_ANONYMOUS(20h) | MAP_PRIVATE(02h) = 22h
   mov  r8, -1h        ; fd     - nonce value for an anonymous mapping  
@@ -102,11 +103,6 @@ _lookupMapByAddress:
   ; check for failure
   cmp rax, -1h
   je .error
-
-  ; TODO check if buffer is too small?
-  ;cmp rax, 1000h
-  ;je .realloc_reread
-  ; TODO will need to free existing memory? maybe try to expand it?
 
   ; TODO remove this write when function is complete
   ; write(int fd, char* buf, size_t count)
@@ -240,5 +236,5 @@ _lookupMapByAddress:
   pop r8
   pop rcx
   ret
-  proc_self_maps: db "/proc/self/maps",0
+  .proc_self_maps: db "/proc/self/maps",0
 _lookupMapByAddress_end:
